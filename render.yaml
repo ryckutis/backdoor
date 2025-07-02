@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: backdoor
+    env: java
+    repo: https://github.com/ryckutis/backdoor
+    branch: main
+    buildCommand: chmod +x ./gradlew && ./gradlew clean build
+    startCommand: ./gradlew bootRun
+    autoDeploy: true
+    envVars:
+      - key: JAVA_VERSION
+        value: 21
