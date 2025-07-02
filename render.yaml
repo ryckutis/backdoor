@@ -1,14 +1,8 @@
 services:
   - type: web
     name: backdoor
-    env: java
+    runtime: docker
     repo: https://github.com/ryckutis/backdoor
     branch: main
-    buildCommand: chmod +x ./gradlew && ./gradlew clean build
-    startCommand: ./gradlew bootRun
+    dockerfilePath: ./Dockerfile
     autoDeploy: true
-    envVars:
-      - key: JAVA_VERSION
-        value: 21
-      - key: JAVA_HOME
-        value: /usr/lib/jvm/java-21-openjdk-amd64
