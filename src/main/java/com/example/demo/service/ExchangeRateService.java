@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.client.FxRates;
 import com.example.demo.client.FxRatesClient;
 import com.example.demo.model.ExchangeRate;
+import com.example.demo.repository.ExchangeRateRepository;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
@@ -19,12 +20,14 @@ import java.util.List;
 public class ExchangeRateService {
 
     private final FxRatesClient fxRatesClient;
+    private final ExchangeRateRepository exchangeRateRepository;
     private final ExchangeRatePerService exchangeRatePerService;
     private static final Logger logger = LoggerFactory.getLogger(ExchangeRateService.class);
 
 
-    public ExchangeRateService(FxRatesClient fxRatesClient, ExchangeRatePerService exchangeRatePerService) {
+    public ExchangeRateService(FxRatesClient fxRatesClient, ExchangeRateRepository exchangeRateRepository, ExchangeRatePerService exchangeRatePerService) {
         this.fxRatesClient = fxRatesClient;
+        this.exchangeRateRepository = exchangeRateRepository;
         this.exchangeRatePerService = exchangeRatePerService;
     }
 
@@ -60,6 +63,17 @@ public class ExchangeRateService {
 
     public List<ExchangeRate> getRatesByDate(LocalDate date) {
         return exchangeRatePerService.getRatesByDate(date);
+    }
+
+    public List<ExchangeRate> getCurrentRates() {
+        LocalDate today = LocalDate.now();
+        return exchangeRatePerService.getRatesByDate(today);
+    }
+
+    public List<ExchangeRate> getHistoricalRates(String baseCurrency, String targetCurrency, int days) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(days);
+        return exchangeRateRepository.findByBaseCurrencyAndTargetCurrencyAndDateBetween(baseCurrency, targetCurrency, startDate, endDate);
     }
 
     @Scheduled(cron = "0 0 1 * * *")
