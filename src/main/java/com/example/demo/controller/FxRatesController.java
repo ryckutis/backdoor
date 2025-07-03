@@ -27,7 +27,7 @@ public class FxRatesController {
         }
     }
 
-    @GetMapping("/by-date")
+    @GetMapping("/date")
     public ResponseEntity<List<ExchangeRate>> getRatesByDate(@RequestParam String date) {
         try {
             LocalDate localDate = LocalDate.parse(date);
