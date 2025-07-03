@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/fxrates")
+@CrossOrigin(origins = "*")
 public class FxRatesController {
 
     @Autowired
@@ -35,6 +36,29 @@ public class FxRatesController {
             return ResponseEntity.ok(rates);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/current")
+    public ResponseEntity<List<ExchangeRate>> getCurrentRates() {
+        try {
+            List<ExchangeRate> rates = exchangeRateService.getCurrentRates();
+            return ResponseEntity.ok(rates);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/historical/{baseCurrency}/{targetCurrency}")
+    public ResponseEntity<List<ExchangeRate>> getHistoricalRates(
+            @PathVariable String baseCurrency,
+            @PathVariable String targetCurrency,
+            @RequestParam(required = false) Integer days) {
+        try {
+            List<ExchangeRate> rates = exchangeRateService.getHistoricalRates(baseCurrency, targetCurrency, days != null ? days : 30);
+            return ResponseEntity.ok(rates);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
         }
     }
 }
