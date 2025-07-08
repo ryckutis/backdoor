@@ -61,4 +61,9 @@ public class FxRatesController {
             return ResponseEntity.status(500).build();
         }
     }
+
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
+    }
 }
