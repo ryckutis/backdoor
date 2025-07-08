@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -71,9 +72,26 @@ public class ExchangeRateService {
     }
 
     public List<ExchangeRate> getHistoricalRates(String baseCurrency, String targetCurrency, int days) {
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate = endDate.minusDays(days);
-        return exchangeRateRepository.findByBaseCurrencyAndTargetCurrencyAndDateBetween(baseCurrency, targetCurrency, startDate, endDate);
+        Optional<LocalDate> mostRecentDate = exchangeRateRepository.findMostRecentDateForCurrencyPair(baseCurrency, targetCurrency);
+
+        LocalDate endDate;
+        if (mostRecentDate.isPresent()) {
+            endDate = mostRecentDate.get();
+        } else {
+            endDate = LocalDate.now();
+            logger.warn("No historical data found for {}/{}, using current date as fallback", baseCurrency, targetCurrency);
+        }
+
+        LocalDate startDate = endDate.minusDays(days - 1);
+
+        logger.info("Fetching historical rates for {}/{} from {} to {} ({} days)",
+                baseCurrency, targetCurrency, startDate, endDate, days);
+
+        List<ExchangeRate> rates = exchangeRateRepository.findByBaseCurrencyAndTargetCurrencyAndDateBetween(
+                baseCurrency, targetCurrency, startDate, endDate);
+
+        logger.info("Found {} historical rates", rates.size());
+        return rates;
     }
 
     @Scheduled(cron = "0 0 1 * * *")
